@@ -44,5 +44,6 @@ dependencies {
 
     // https://mvnrepository.com/artifact/androidx.recyclerview/recyclerview
     implementation group: 'androidx.recyclerview', name: 'recyclerview', version: '1.0.0'
+    implementation 'com.google.code.gson:gson:2.8.5'
 
 }

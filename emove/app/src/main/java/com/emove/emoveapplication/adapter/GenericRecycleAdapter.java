@@ -27,8 +27,7 @@ public abstract class GenericRecycleAdapter<T, K extends Holders.TextImageHolder
         if (list != null) {
             this.mList = list;
         }
-    } 
-
+    }
 
     public void refresh(List<T> list) {
         if (list != null) {
