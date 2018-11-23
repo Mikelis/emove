@@ -6,7 +6,8 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.emove.emoveapplication"
-        minSdkVersion 21
+        // TODO otherwise lib crashes?
+        minSdkVersion 26
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -31,12 +32,18 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
 
     // Rx
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.0'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.2'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
 
     // Network
     implementation 'com.squareup.okhttp3:okhttp:3.12.0'
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+
+    // Ble
+    implementation "com.polidea.rxandroidble2:rxandroidble:1.7.1"
+
+    // Logging
+    implementation 'com.jakewharton.timber:timber:4.7.1'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.0'
