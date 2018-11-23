@@ -1,8 +1,11 @@
 <component name="libraryTable">
   <library name="Gradle: mdslib:1.28.1(1)-release@aar">
+    <ANNOTATIONS>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/mdslib-1.28.1(1)-release.aar/51dc3009f253ba232c9e94e31b75524d/annotations.zip!/" />
+    </ANNOTATIONS>
     <CLASSES>
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/mdslib-1.28.1(1)-release.aar/6f3f4d82b4ececd5872454721b7b7389/res" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/mdslib-1.28.1(1)-release.aar/6f3f4d82b4ececd5872454721b7b7389/jars/classes.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/mdslib-1.28.1(1)-release.aar/51dc3009f253ba232c9e94e31b75524d/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/mdslib-1.28.1(1)-release.aar/51dc3009f253ba232c9e94e31b75524d/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

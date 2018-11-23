@@ -2,8 +2,8 @@ apply plugin: 'com.android.application'
 
 buildscript {
     repositories {
-        jcenter()
         google()
+        jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.1'
@@ -12,8 +12,8 @@ buildscript {
 
 allprojects {
     repositories {
+        google()
         jcenter()
-        maven { url "https://maven.google.com" }
         maven { url "https://jitpack.io" }
         flatDir {
             dirs './', '../Movesense/' // Folders to look for jar & aar libraries
