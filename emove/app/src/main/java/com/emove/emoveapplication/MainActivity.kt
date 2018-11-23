@@ -8,20 +8,21 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
 import com.emove.emoveapplication.MainViewModel.State
-import io.reactivex.disposables.CompositeDisposable
+import com.polidea.rxandroidble.RxBleClient
 import kotlinx.android.synthetic.main.activity_main.*
+import rx.subscriptions.CompositeSubscription
 
 
 class MainActivity : AppCompatActivity() {
 
-    private val subs = CompositeDisposable()
+    private val subs = CompositeSubscription()
     private lateinit var vm: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        vm = ViewModelProviders.of(this, MainViewModel.Factory(lifecycle))
+        vm = ViewModelProviders.of(this, MainViewModel.Factory(lifecycle, RxBleClient.create(this)))
                 .get(MainViewModel::class.java)
     }
 
