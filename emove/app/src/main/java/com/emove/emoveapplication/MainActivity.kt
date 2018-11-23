@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        vm = ViewModelProviders.of(this, MainViewModel.Factory(lifecycle, RxBleClient.create(this)))
+        vm = ViewModelProviders.of(this, MainViewModel.Factory(lifecycle, RxBleClient.create(this), ))
                 .get(MainViewModel::class.java)
     }
 

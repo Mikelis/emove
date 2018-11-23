@@ -2,6 +2,7 @@ package com.emove.emoveapplication
 
 import androidx.lifecycle.*
 import com.emove.emoveapplication.models.MyScanResult
+import com.movesense.mds.Mds
 import com.polidea.rxandroidble.RxBleClient
 import com.polidea.rxandroidble.RxBleDevice
 import com.polidea.rxandroidble.scan.ScanResult
@@ -10,11 +11,15 @@ import rx.Observable
 import rx.subjects.BehaviorSubject
 import rx.subscriptions.CompositeSubscription
 
-class MainViewModel(lifecycle: Lifecycle,
-                    private val rxBleClient: RxBleClient) : ViewModel(), LifecycleObserver {
+class MainViewModel(
+        lifecycle: Lifecycle,
+        private val rxBleClient: RxBleClient,
+        private val mds: Mds
+) : ViewModel(), LifecycleObserver, MdsListener.Callback {
 
     private val subs = CompositeSubscription()
     private val stateSubject: BehaviorSubject<State> = BehaviorSubject.create(State.default())
+    private var myScanResult: MyScanResult? = null
 
     init {
         lifecycle.addObserver(this)
@@ -35,16 +40,29 @@ class MainViewModel(lifecycle: Lifecycle,
 
     private fun onScanResult(scanResult: ScanResult) {
         if (scanResult.bleDevice?.name?.startsWith("Movesense") == true) {
-            val msr = MyScanResult(scanResult)
+            myScanResult = MyScanResult(scanResult)
+            val bleDevice = rxBleClient.getBleDevice(myScanResult!!.macAddress)
+            mds.connect(bleDevice.macAddress, MdsListener(this))
         }
     }
 
+    override fun onConnected(macAddress: String, serial: String) {
+        myScanResult!!.markConnected(serial)
+        stateSubject.onNext(State.Connected)
+        subToSensor()
+    }
+
+    private fun subToSensor() {
+        // TODO
+    }
+
     class Factory(private val lifecycle: Lifecycle,
-                  private val rxBleClient: RxBleClient) : ViewModelProvider.NewInstanceFactory() {
+                  private val rxBleClient: RxBleClient,
+                  private val mds: Mds) : ViewModelProvider.NewInstanceFactory() {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return MainViewModel(lifecycle, rxBleClient) as T
+            return MainViewModel(lifecycle, rxBleClient, mds) as T
         }
     }
 
@@ -52,6 +70,7 @@ class MainViewModel(lifecycle: Lifecycle,
 
         object Initial : State()
         object Scanning : State()
+        object Connected : State()
 
         data class Ready(val sensor: RxBleDevice) : State()
 
