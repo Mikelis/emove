@@ -26,6 +26,7 @@ import com.polidea.rxandroidble.scan.ScanSettings
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
+import rx.functions.Func2
 import rx.schedulers.Schedulers
 import rx.subjects.BehaviorSubject
 import java.util.*
@@ -87,33 +88,38 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
         }
     private val dataSubject: BehaviorSubject<Data> = BehaviorSubject.create(data)
 
-    fun getData(): Observable<Data> = dataSubject.asObservable()
+    fun getData(): Observable<Data> = dataSubject.onBackpressureLatest()
 
-    fun t() {
-        dataSubject.asObservable()
-                .map { d -> d.heartRate?.body?.rrData?.firstOrNull() ?: 0 }
+    fun getHrv(): Observable<Double> = getData()
+            .map { d -> d.heartRate?.body?.rrData?.firstOrNull() ?: 0 }
 //                .doOnNext { Log.d("HRVR", it.toString()) }
-                .buffer(150, 15) // 10 sec, 1 sec
+            .window(150, 15) // 10 sec, 1 sec
+            .flatMap { it.toList() }
 //                .doOnNext { Log.d("HRV Buffered", it.toString()) }
-                .map { list ->
-                    (0 until (list.size - 1)).map { i ->
-                        Math.pow((list[i] - list[i + 1]).toDouble(), 2.toDouble())
-                    }
+            .map { list ->
+                (0 until (list.size - 1)).map { i ->
+                    Math.pow((list[i] - list[i + 1]).toDouble(), 2.toDouble())
                 }
+            }
 //                .doOnNext { Log.d("HRV Squares", it.toString()) }
-                .map { squares -> Math.sqrt(squares.average()) } // average error
+            .map { squares -> Math.sqrt(squares.average()) } // average error
 //                .doOnNext { Log.d("HRV avg err", it.toString()) }
-                .buffer(10, 1) // 1 min
-                .map { list: MutableList<Double> ->
-                    val min = list.min() ?: 0.toDouble()
-                    val max = list.max() ?: 0.toDouble()
-                    val diff = max - min
-                    Triple(min, max, diff)
-                }
-                .subscribe {
-                    Log.d("HRV size", it.toString())
-                }
-    }
+            .window(10, 1).flatMap { it.toList() } // 1 min
+            .map { list: MutableList<Double> ->
+                val min = list.min() ?: 0.toDouble()
+                val max = list.max() ?: 0.toDouble()
+                val diff = max - min
+                diff
+            }
+            .filter { it < 10 } // filter out window start artifacts
+
+    fun getMaxHrv(): Observable<Double> = getHrv()
+            .window(300, 1)
+            .flatMap { it.toList() }
+            .doOnNext { Log.d("HRV max list", it.toString()) }
+            .map { it.max() ?: 0.toDouble() }
+            .startWith(0.toDouble())
+            .distinctUntilChanged()
 
     companion object {
         private val LOG_TAG = MainActivity::class.java.simpleName
@@ -160,7 +166,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
                     updateCurrentData(data)
                 }
 
-        t()
+        Observable.combineLatest(getHrv(), getMaxHrv()) { hrv: Double, max: Double ->
+            "$hrv ($max)"
+        }.subscribe { Log.d("HRV", it) }
     }
 
     private fun updateCurrentData(data: Data) {
