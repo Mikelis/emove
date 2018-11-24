@@ -32,14 +32,14 @@
         android:layout_height="match_parent">
     </include>
 
-    <android.support.constraint.ConstraintLayout
+    <include
         android:id="@+id/onboardingFour"
         app:layout_constraintStart_toEndOf="@id/onboardingThree"
         android:background="@drawable/gradient_dark_blue"
-
+        layout="@layout/real_deal_layout"
         android:layout_width="150dp"
         android:layout_height="match_parent">
-    </android.support.constraint.ConstraintLayout>
+    </include>
 
 
 </android.support.constraint.ConstraintLayout>

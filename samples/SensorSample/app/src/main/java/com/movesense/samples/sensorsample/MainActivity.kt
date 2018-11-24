@@ -17,6 +17,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import android.widget.TextView
 import com.google.gson.Gson
 import com.movesense.mds.*
 import com.polidea.rxandroidble.RxBleClient
@@ -57,6 +58,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
     private lateinit var nextOne: View
     private lateinit var nextTwo: View
     private lateinit var constraintParent: ConstraintLayout
+
+    private lateinit var bpm: TextView
+    private lateinit var temp: TextView
+    private lateinit var variability: TextView
+    private lateinit var tiredStatus: TextView
+
 
     private// Init RxAndroidBle (Ble helper library) if not yet initialized
     val bleClient: RxBleClient?
@@ -122,8 +129,17 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
         setOnBoardingNavigation()
         getData().subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread()).subscribe { data ->
-                    Log.e("GetData",data.heartRate.toString())
+                    updateCurrentData(data)
                 }
+    }
+
+    private fun updateCurrentData(data: Data) {
+
+        val hr = data.heartRate?.body?.average
+        bpm.text = "%.0f".format(hr)
+        temp.text = "%.2f".format((data.temperature?.body?.measurement?.minus(273.15)))
+//        variability.text = "%.2f".format(data.heartRate?.body?.)
+
     }
 
     private fun getViews() {
@@ -135,6 +151,11 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
         nextOne = findViewById(R.id.nextOne)
         nextTwo = findViewById(R.id.nextTwo)
         constraintParent = findViewById(R.id.constraintParent) as ConstraintLayout
+
+        bpm = findViewById(R.id.bpm) as TextView
+        temp = findViewById(R.id.temperature) as TextView
+        variability = findViewById(R.id.heartrate) as TextView
+        tiredStatus = findViewById(R.id.tired_status) as TextView
     }
 
 
@@ -435,7 +456,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
                 .setTitle("Connection Error:")
                 .setMessage(e.message)
 
-        builder.create().show()
+//        builder.create().show()
     }
 
     private fun unsubscribe() {
