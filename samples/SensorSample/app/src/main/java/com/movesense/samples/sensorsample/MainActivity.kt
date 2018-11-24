@@ -112,13 +112,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
             }
             .filter { it < 10 } // filter out window start artifacts
 
-    fun getMaxHrv(): Observable<Double> = getHrv()
-            .window(300, 1)
-            .flatMap { it.toList() }
-            .doOnNext { Log.d("HRV max list", it.toString()) }
-            .map { it.max() ?: 0.toDouble() }
-            .startWith(0.toDouble())
-            .distinctUntilChanged()
+    private var maxHrv: Double = 0.toDouble()
 
     companion object {
         private val LOG_TAG = MainActivity::class.java.simpleName
@@ -192,9 +186,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
 //        tiredStatus(data)
     }
 
-    private fun updateCurrentHrvData(data: Double) {
-        variability.text = "%.2f".format(data)
-        tiredStatus(data)
+    private fun updateCurrentHrvData(hrv: Double) {
+        if (hrv > maxHrv) maxHrv = hrv  // TODO USE THIS
+        variability.text = "%.2f".format(hrv)
+        tiredStatus(hrv)
     }
 
     private fun tiredStatus(data: Double) {
