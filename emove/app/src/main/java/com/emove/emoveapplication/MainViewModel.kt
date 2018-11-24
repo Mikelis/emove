@@ -10,6 +10,7 @@ import com.polidea.rxandroidble.scan.ScanSettings
 import rx.Observable
 import rx.subjects.BehaviorSubject
 import rx.subscriptions.CompositeSubscription
+import timber.log.Timber
 
 class MainViewModel(
         lifecycle: Lifecycle,
@@ -19,6 +20,7 @@ class MainViewModel(
 
     private val subs = CompositeSubscription()
     private val stateSubject: BehaviorSubject<State> = BehaviorSubject.create(State.default())
+
     private var myScanResult: MyScanResult? = null
 
     init {
@@ -39,15 +41,26 @@ class MainViewModel(
     }
 
     private fun onScanResult(scanResult: ScanResult) {
-        if (scanResult.bleDevice?.name?.startsWith("Movesense") == true) {
-            myScanResult = MyScanResult(scanResult)
-            val bleDevice = rxBleClient.getBleDevice(myScanResult!!.macAddress)
-            mds.connect(bleDevice.macAddress, MdsListener(this))
+        if (scanResult.bleDevice.macAddress != null &&
+                scanResult.bleDevice?.name?.startsWith("Movesense") == true) {
+            if (myScanResult == null) {
+                myScanResult = MyScanResult(scanResult)
+
+                val bleDevice = rxBleClient.getBleDevice(scanResult.bleDevice.macAddress)
+                mds.connect(bleDevice.macAddress, MdsListener(this))
+            } else {
+                if (scanResult.bleDevice.macAddress.equals(myScanResult?.macAddress, true)) {
+                    if (myScanResult?.isConnected != true) {
+                        val bleDevice = rxBleClient.getBleDevice(scanResult.bleDevice.macAddress)
+                        mds.connect(bleDevice.macAddress, MdsListener(this))
+                    }
+                }
+            }
         }
     }
 
     override fun onConnected(macAddress: String, serial: String) {
-         myScanResult!!.markConnected(serial)
+        myScanResult!!.markConnected(serial)
         stateSubject.onNext(State.Connected)
         subToSensor()
     }
