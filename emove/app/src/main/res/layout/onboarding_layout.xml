@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintParent"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include
+        android:id="@+id/onboardingOne"
+        layout="@layout/onboarding_zero"
+        android:layout_width="150dp"
+        android:layout_height="match_parent"/>
+
+    <include
+        layout="@layout/onboarding_one"
+        android:id="@+id/onboardingTwo"
+        app:layout_constraintStart_toEndOf="@id/onboardingOne"
+
+
+        android:layout_width="150dp"
+        android:layout_height="match_parent">
+    </include>
+
+    <include
+        android:id="@+id/onboardingThree"
+        app:layout_constraintStart_toEndOf="@id/onboardingTwo"
+        layout="@layout/onboarding_two"
+
+        android:layout_width="150dp"
+        android:layout_height="match_parent">
+    </include>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/onboardingFour"
+        app:layout_constraintStart_toEndOf="@id/onboardingThree"
+        android:background="@drawable/gradient_dark_blue"
+
+        android:layout_width="150dp"
+        android:layout_height="match_parent">
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
