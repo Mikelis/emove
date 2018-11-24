@@ -39,6 +39,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:visibility="invisible"
         android:textStyle="bold"
         android:id="@+id/textView"
         android:layout_width="wrap_content"

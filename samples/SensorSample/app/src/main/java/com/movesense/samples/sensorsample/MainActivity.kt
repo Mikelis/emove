@@ -15,6 +15,7 @@ import android.transition.TransitionManager
 import android.util.Log
 import android.util.TypedValue
 import android.view.View
+import android.view.animation.AlphaAnimation
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
@@ -173,30 +174,52 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
     }
 
     private fun tiredStatus(data: Data) {
-        val hr = data.heartRate?.body?.average
-        if (hr != null && hr > 85) {
-            tiredStatus.text = getString(R.string.sleepy)
-            sleepView.visibility = View.VISIBLE
-            playAlarm()
-        } else {
-            sleepView.visibility = View.GONE
+        when (data.getState()) {
+            MainActivity.Data.State.ALERT -> {
+                hideLight()
+                tiredStatus.text = getText(R.string.tired)
 
-            tiredStatus.text = getString(R.string.tired)
+            }
+            MainActivity.Data.State.DROWSY -> {
+                hideLight()
+            }
+            MainActivity.Data.State.SLEEP -> {
+                playAlarm()
+                showLight()
+            }
         }
     }
 
     private fun playAlarm() {
-        if(playing){
+        if (playing) {
             return
         }
         val mp = MediaPlayer.create(this, R.raw.alarm)
         mp.setOnCompletionListener { end ->
             mp.reset()
             mp.release()
-            playing =  false
+            playing = false
         }
 
         mp.start()
+    }
+
+    private fun showLight() {
+        sleepView.tag = 1
+        val animation1 = AlphaAnimation(0f, 1.0f)
+        animation1.duration = 1000
+        animation1.fillAfter = true
+        sleepView.startAnimation(animation1)
+    }
+
+    private fun hideLight() {
+        if (sleepView.tag == 1) {
+            sleepView.tag = 0
+            val animation1 = AlphaAnimation(0f, 1.0f)
+            animation1.duration = 1000
+            animation1.fillAfter = true
+            sleepView.startAnimation(animation1)
+        }
     }
 
     private fun getViews() {
