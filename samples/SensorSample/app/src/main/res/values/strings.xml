@@ -6,4 +6,13 @@
         - click on &quot;Unsubscribe&quot; will unsubscribe from sensor data.\n
         - Long click on connected device will disconnect
     </string>
+    <string name="don_t_fall_asleep">Don’t fall asleep</string>
+    <string name="skip">Skip</string>
+    <string name="by">by</string>
+    <string name="using_movesense_we_could_detect_muscle_shifts_slower_breathing_heart_rate_drops_and_temperature_change">Using movesense we could detect muscle shifts, slower breathing, heart rate drops and temperature change</string>
+    <string name="we_can_detect_the_moment_you_start_to_fall_asleep">We can detect the moment you start to fall asleep</string>
+    <string name="we_can_signal_you_if_you_reach_the_critical_zone">We can signal You if You reach the critical zone</string>
+    <string name="we_can_detect_the_tirideness_of_driver_and_give_alerts_to_driver_and_fleet_tracking_company">We can detect the tirideness of driver and give alerts to driver and fleet tracking company</string>
+    <string name="car_crashes_descr">70 000+ car crashes happen each year by drivers falling asleep</string>
+    <string name="according_to_data_from_2013">According to data from 2013.</string>
 </resources>
