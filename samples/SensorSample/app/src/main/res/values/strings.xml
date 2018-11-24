@@ -28,4 +28,5 @@
     <string name="simulate">Simulate</string>
     <string name="analyzing">Analyzing</string>
     <string name="neutral">Neutral</string>
+    <string name="alert">Alert</string>
 </resources>

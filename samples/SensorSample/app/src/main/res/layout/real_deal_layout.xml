@@ -229,6 +229,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
+        android:visibility="invisible"
         android:id="@+id/simulate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

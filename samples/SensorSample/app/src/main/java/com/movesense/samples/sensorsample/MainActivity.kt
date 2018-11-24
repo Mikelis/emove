@@ -5,6 +5,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.Handler
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
 import android.support.v4.app.ActivityCompat
@@ -194,16 +195,19 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
 
     private fun tiredStatus(data: Double) {
         when {
-            data < 2 -> {
+            data < 2 -> { // alert - good
                 hideLight()
-                tiredStatus.text = getString(R.string.neutral)
+                tiredStatus.text = getString(R.string.alert)
+                tiredStatus.setTextColor(resources.getColor(R.color.alert_color))
             }
-            data < 6 -> {
+            data < (0.9 * maxHrv) -> { // normal
                 hideLight()
-                tiredStatus.text = getText(R.string.tired)
+                tiredStatus.text = getText(R.string.neutral)
+                tiredStatus.setTextColor(resources.getColor(R.color.green_color))
             }
             else -> {
                 tiredStatus.text = getText(R.string.sleepy)
+                tiredStatus.setTextColor(resources.getColor(R.color.status_color))
                 playAlarm()
                 showLight()
             }
@@ -234,6 +238,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
             mp.release()
             playing = false
         }
+        //TODO do correctly
+        Handler().postDelayed({
+            mp?.stop()
+        },1000)
 
         mp.start()
     }
@@ -244,6 +252,11 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
 //        animation1.duration = 1000
 //        animation1.fillAfter = true
 //        sleepView.startAnimation(animation1)
+
+        //TODO do correctly
+        Handler().postDelayed({
+            hideLight()
+        },1000)
         sleepView.visibility = View.VISIBLE
     }
 
@@ -255,6 +268,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
 //            animation1.fillAfter = true
 //            sleepView.startAnimation(animation1)
 //        }
+
         sleepView.visibility = View.GONE
     }
 
