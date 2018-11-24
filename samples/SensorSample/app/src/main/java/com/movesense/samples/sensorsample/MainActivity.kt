@@ -23,6 +23,8 @@ import com.polidea.rxandroidble.RxBleClient
 import com.polidea.rxandroidble.scan.ScanSettings
 import rx.Observable
 import rx.Subscription
+import rx.android.schedulers.AndroidSchedulers
+import rx.schedulers.Schedulers
 import rx.subjects.BehaviorSubject
 import java.util.*
 
@@ -118,6 +120,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
         getViews()
         setWindowWidthToScreens()
         setOnBoardingNavigation()
+        getData().subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread()).subscribe { data ->
+                    Log.e("",data.heartRate.toString())
+                }
     }
 
     private fun getViews() {
@@ -205,10 +211,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
                     arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
                     MY_PERMISSIONS_REQUEST_LOCATION)
 
+        } else {
+            onScanClicked()
         }
     }
 
-    fun onScanClicked(view: View) {
+    fun onScanClicked() {
 //        findViewById(R.id.buttonScan).visibility = View.GONE
 //        findViewById(R.id.buttonScanStop).visibility = View.VISIBLE
 
