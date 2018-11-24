@@ -12,16 +12,17 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
-import android.widget.TextView
 
 import com.google.gson.Gson
 import com.movesense.mds.*
 import com.polidea.rxandroidble.RxBleClient
 import com.polidea.rxandroidble.scan.ScanSettings
+import rx.Observable
 
 import java.util.ArrayList
 
 import rx.Subscription
+import rx.subjects.BehaviorSubject
 
 class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
 
@@ -54,6 +55,15 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
         }
 
     internal var mScanSubscription: Subscription? = null
+
+    private var data: Data = Data()
+        set(value) {
+            field = value
+            dataSubject.onNext(value)
+        }
+    private val dataSubject: BehaviorSubject<Data> = BehaviorSubject.create(data)
+
+    fun getData(): Observable<Data> = dataSubject.asObservable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -178,10 +188,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
 
         accSubscription = mMds?.subscribe(URI_EVENTLISTENER,
                 strContract, object : MdsNotificationListener {
-            override fun onNotification(data: String) {
+            override fun onNotification(notification: String) {
 
-
-                val accResponse = Gson().fromJson(data, AccDataResponse::class.java)
+                val accResponse = Gson().fromJson(notification, AccDataResponse::class.java)
+                data = data.copy(acceleration = accResponse)
 
 //                Log.d("MainActivity", "Subscription Accelometer - ${accResponse.body.array}")
             }
@@ -194,8 +204,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
 
         tempSubscription = mMds?.subscribe("suunto://MDS/EventListener",
                 formatContractToJson(connectedSerial, "Meas/Temp"), object : MdsNotificationListener {
-            override fun onNotification(data: String) {
-                val temperature = Gson().fromJson<TemperatureSubscribeModel>(data, TemperatureSubscribeModel::class.java)
+            override fun onNotification(notification: String) {
+
+                val temperature = Gson().fromJson<TemperatureSubscribeModel>(notification, TemperatureSubscribeModel::class.java)
+                data = data.copy(temperature = temperature)
 
                 Log.d("MainActivity", "Subscription Temperature - ${temperature.body.measurement - 273.15}")
 
@@ -209,10 +221,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
 
         heartRateSubscription = mMds?.subscribe("suunto://MDS/EventListener",
                 formatContractToJson(connectedSerial, "Meas/Hr"), object : MdsNotificationListener {
-            override fun onNotification(data: String) {
-                val temperature = Gson().fromJson<HeartRate>(data, HeartRate::class.java)
+            override fun onNotification(notification: String) {
 
-                Log.d("MainActivity", "Subscription R-R - ${temperature.body.rrData.asList()}")
+                val heartRate = Gson().fromJson<HeartRate>(notification, HeartRate::class.java)
+                data = data.copy(heartRate = heartRate)
+
+                Log.d("MainActivity", "Subscription R-R - ${heartRate.body.rrData.asList()}")
             }
 
             override fun onError(error: MdsException) {
@@ -332,5 +346,19 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
 
         // Sensor subscription
         private val URI_MEAS_ACC_13 = "/Meas/Acc/13"
+    }
+
+    data class Data(
+            val acceleration: AccDataResponse? = null,
+            val heartRate: HeartRate? = null,
+            val temperature: TemperatureSubscribeModel? = null
+    ) {
+
+        fun getState(): State = State.ALERT
+
+        enum class State {
+            ALERT, DROWSY, SLEEP
+        }
+
     }
 }
