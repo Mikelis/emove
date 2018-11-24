@@ -97,7 +97,7 @@
       <file leaf-file-name="EcgActivityGraphView.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/movesense/showcaseapp/section_01_movesense/tests/EcgActivityGraphView.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="740">
+            <state relative-caret-position="3855">
               <caret line="307" column="16" lean-forward="true" selection-start-line="307" selection-start-column="16" selection-end-line="307" selection-end-column="16" />
             </state>
           </provider>
@@ -1367,7 +1367,8 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1440" height="829" extended-state="6" />
+    <frame x="0" y="23" width="1440" height="827" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="Android Profiler" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -1504,7 +1505,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/movesense/showcaseapp/section_01_movesense/tests/EcgActivityGraphView.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="740">
+        <state relative-caret-position="3855">
           <caret line="307" column="16" lean-forward="true" selection-start-line="307" selection-start-column="16" selection-end-line="307" selection-end-column="16" />
         </state>
       </provider>

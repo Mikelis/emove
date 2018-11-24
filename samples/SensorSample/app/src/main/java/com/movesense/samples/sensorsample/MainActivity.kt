@@ -28,7 +28,7 @@ import rx.schedulers.Schedulers
 import rx.subjects.BehaviorSubject
 import java.util.*
 
-class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener {
+class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
 
     // MDS
     private var mMds: Mds? = null
@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
         setOnBoardingNavigation()
         getData().subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread()).subscribe { data ->
-                    Log.e("",data.heartRate.toString())
+                    Log.e("GetData",data.heartRate.toString())
                 }
     }
 
@@ -242,10 +242,15 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
 
                                 // replace if exists already, add otherwise
                                 val msr = MyScanResult(scanResult)
-                                if (mScanResArrayList.contains(msr))
-                                    mScanResArrayList[mScanResArrayList.indexOf(msr)] = msr
-                                else
+                                if (mScanResArrayList.contains(msr)) {
+//                                    mScanResArrayList[mScanResArrayList.indexOf(msr)] = msr
+                                    Log.d("mScanResArrayList", "OnItemClick")
+//                                    onItemClick(mScanResArrayList.indexOf(msr))
+                                } else {
                                     mScanResArrayList.add(0, msr)
+                                    Log.d("mScanResArrayList", "OnItemClick")
+                                    onItemClick(0)
+                                }
 
                                 mScanResArrayAdapter?.notifyDataSetChanged()
                             }
@@ -270,11 +275,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
 //        findViewById(R.id.buttonScanStop).visibility = View.GONE
     }
 
-    override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+    private fun onItemClick(position: Int) {
         if (position < 0 || position >= mScanResArrayList.size)
             return
 
         val device = mScanResArrayList[position]
+        Log.d("onItemClick", "$device")
         if (!device.isConnected) {
             // Stop scanning
             onScanStopClicked(null)
@@ -394,6 +400,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
                 for (sr in mScanResArrayList) {
                     if (sr.macAddress.equals(macAddress, ignoreCase = true)) {
                         sr.markConnected(serial)
+                        subscribeToSensor(serial)
                         break
                     }
                 }
