@@ -25,4 +25,5 @@
     <string name="temp_placeholder">36.4</string>
     <string name="hr_placeholder">84</string>
     <string name="sleepy">Sleepy</string>
+    <string name="simulate">Simulate</string>
 </resources>
