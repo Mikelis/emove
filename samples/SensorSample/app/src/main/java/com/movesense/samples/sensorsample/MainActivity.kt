@@ -1,7 +1,6 @@
 package com.movesense.samples.sensorsample
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
@@ -16,14 +15,8 @@ import android.widget.ListView
 import android.widget.TextView
 
 import com.google.gson.Gson
-import com.movesense.mds.Mds
-import com.movesense.mds.MdsConnectionListener
-import com.movesense.mds.MdsException
-import com.movesense.mds.MdsNotificationListener
-import com.movesense.mds.MdsResponseListener
-import com.movesense.mds.MdsSubscription
+import com.movesense.mds.*
 import com.polidea.rxandroidble.RxBleClient
-import com.polidea.rxandroidble.RxBleDevice
 import com.polidea.rxandroidble.scan.ScanSettings
 
 import java.util.ArrayList
@@ -38,8 +31,14 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
     // UI
     private var mScanResultListView: ListView? = null
     private val mScanResArrayList = ArrayList<MyScanResult>()
-    internal var mScanResArrayAdapter: ArrayAdapter<MyScanResult>?  = null
-    private var mdsSubscription: MdsSubscription? = null
+    internal var mScanResArrayAdapter: ArrayAdapter<MyScanResult>? = null
+
+
+    private var accSubscription: MdsSubscription? = null
+    private var tempSubscription: MdsSubscription? = null
+    private var heartRateSubscription: MdsSubscription? = null
+
+
     private var subscribedDeviceSerial: String? = null
 
     private// Init RxAndroidBle (Ble helper library) if not yet initialized
@@ -163,7 +162,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
 
     private fun subscribeToSensor(connectedSerial: String) {
         // Clean up existing subscription (if there is one)
-        if (mdsSubscription != null) {
+        if (accSubscription != null) {
             unsubscribe()
         }
 
@@ -176,22 +175,15 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
 
         subscribedDeviceSerial = connectedSerial
 
-        mdsSubscription = mMds?.subscribe(URI_EVENTLISTENER,
+        accSubscription = mMds?.subscribe(URI_EVENTLISTENER,
                 strContract, object : MdsNotificationListener {
             override fun onNotification(data: String) {
                 Log.d(LOG_TAG, "onNotification(): $data")
 
-                // If UI not enabled, do it now
-                if (sensorUI.visibility == View.GONE)
-                    sensorUI.visibility = View.VISIBLE
 
                 val accResponse = Gson().fromJson(data, AccDataResponse::class.java)
-                if (accResponse != null && accResponse.body.array.size > 0) {
 
-                    val accStr = String.format("%.02f, %.02f, %.02f", accResponse.body.array[0].x, accResponse.body.array[0].y, accResponse.body.array[0].z)
-
-                    (findViewById(R.id.sensorMsg) as TextView).text = accStr
-                }
+//                Log.d("MainActivity", "Subscription Accelometer - ${accResponse.body.array}")
             }
 
             override fun onError(error: MdsException) {
@@ -200,6 +192,39 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
             }
         })
 
+        tempSubscription = mMds?.subscribe("suunto://MDS/EventListener",
+                formatContractToJson(connectedSerial, "Meas/Temp"), object : MdsNotificationListener {
+            override fun onNotification(data: String) {
+                val temperature = Gson().fromJson<TemperatureSubscribeModel>(data, TemperatureSubscribeModel::class.java)
+
+                Log.d("MainActivity", "Subscription Temperature - ${temperature.body.measurement - 273.15}")
+            }
+
+            override fun onError(error: MdsException) {
+                Log.e(LOG_TAG, "subscription onError(): ", error)
+                unsubscribe()
+            }
+        })
+
+        heartRateSubscription = mMds?.subscribe("suunto://MDS/EventListener",
+                formatContractToJson(connectedSerial, "Meas/Hr"), object : MdsNotificationListener {
+            override fun onNotification(data: String) {
+                val temperature = Gson().fromJson<HeartRate>(data, HeartRate::class.java)
+
+                Log.d("MainActivity", "Subscription HeartRate - ${temperature.body.average}")
+            }
+
+            override fun onError(error: MdsException) {
+                Log.e(LOG_TAG, "subscription onError(): ", error)
+                unsubscribe()
+            }
+        })
+
+    }
+
+    fun formatContractToJson(serial: String, uri: String): String {
+        val sb = StringBuilder()
+        return sb.append("{\"Uri\": \"").append(serial).append("/").append(uri).append("\"}").toString()
     }
 
     override fun onItemLongClick(parent: AdapterView<*>, view: View, position: Int, id: Long): Boolean {
@@ -271,9 +296,14 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
     }
 
     private fun unsubscribe() {
-        if (mdsSubscription != null) {
-            mdsSubscription!!.unsubscribe()
-            mdsSubscription = null
+        if (accSubscription != null) {
+            accSubscription!!.unsubscribe()
+            accSubscription = null
+        }
+
+        if (tempSubscription != null) {
+            tempSubscription!!.unsubscribe()
+            tempSubscription = null
         }
 
         subscribedDeviceSerial = null
