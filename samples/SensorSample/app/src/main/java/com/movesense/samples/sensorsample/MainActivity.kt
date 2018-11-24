@@ -15,7 +15,6 @@ import android.transition.TransitionManager
 import android.util.Log
 import android.util.TypedValue
 import android.view.View
-import android.view.animation.AlphaAnimation
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
@@ -27,7 +26,6 @@ import com.polidea.rxandroidble.scan.ScanSettings
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
-import rx.functions.Func2
 import rx.schedulers.Schedulers
 import rx.subjects.BehaviorSubject
 import java.util.*
@@ -166,36 +164,69 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
                 .observeOn(AndroidSchedulers.mainThread()).subscribe { data ->
                     updateCurrentData(data)
                 }
+        getHrv().subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread()).subscribe { data ->
+                    updateCurrentHrvData(data)
+                }
 
-        Observable.combineLatest(getHrv(), getMaxHrv()) { hrv: Double, max: Double ->
-            "$hrv ($max)"
-        }.subscribe { Log.d("HRV", it) }
+//        Observable.combineLatest(getHrv(), getMaxHrv()) { hrv: Double, max: Double ->
+//            "$hrv ($max)"
+//        }.subscribe { Log.d("HRV", it) }
     }
 
     private fun updateCurrentData(data: Data) {
-
-        val hr = data.heartRate?.body?.average
-        bpm.text = "%.0f".format(hr)
-        temp.text = "%.2f".format((data.temperature?.body?.measurement?.minus(273.15)))
+        if(data.heartRate==null){
+            bpm.text = "..."
+        }
+        else {
+            val hr = data.heartRate?.body?.average
+            bpm.text = "%.0f".format(hr)
+        }
+        if(data.temperature == null){
+            temp.text = "..."
+        }
+        else {
+            temp.text = "%.2f".format((data.temperature?.body?.measurement?.minus(273.15)))
+        }
 //        variability.text = "%.2f".format(data.heartRate?.body?.)
+//        tiredStatus(data)
+    }
+
+    private fun updateCurrentHrvData(data: Double) {
+        variability.text = "%.2f".format(data)
         tiredStatus(data)
     }
 
-    private fun tiredStatus(data: Data) {
-        when (data.getState()) {
-            MainActivity.Data.State.ALERT -> {
+    private fun tiredStatus(data: Double) {
+        when {
+            data < 2 -> {
+                hideLight()
+                tiredStatus.text = getString(R.string.neutral)
+            }
+            data < 6 -> {
                 hideLight()
                 tiredStatus.text = getText(R.string.tired)
-
             }
-            MainActivity.Data.State.DROWSY -> {
-                hideLight()
-            }
-            MainActivity.Data.State.SLEEP -> {
+            else -> {
+                tiredStatus.text = getText(R.string.sleepy)
                 playAlarm()
                 showLight()
             }
         }
+//        when (data) {
+//            MainActivity.Data.State.ALERT -> {
+//                hideLight()
+//                tiredStatus.text = getText(R.string.tired)
+//
+//            }
+//            MainActivity.Data.State.DROWSY -> {
+//                hideLight()
+//            }
+//            MainActivity.Data.State.SLEEP -> {
+//                playAlarm()
+//                showLight()
+//            }
+//        }
     }
 
     private fun playAlarm() {
@@ -213,21 +244,23 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
     }
 
     private fun showLight() {
-        sleepView.tag = 1
-        val animation1 = AlphaAnimation(0f, 1.0f)
-        animation1.duration = 1000
-        animation1.fillAfter = true
-        sleepView.startAnimation(animation1)
+//        sleepView.tag = 1
+//        val animation1 = AlphaAnimation(0f, 1.0f)
+//        animation1.duration = 1000
+//        animation1.fillAfter = true
+//        sleepView.startAnimation(animation1)
+        sleepView.visibility = View.VISIBLE
     }
 
     private fun hideLight() {
-        if (sleepView.tag == 1) {
-            sleepView.tag = 0
-            val animation1 = AlphaAnimation(0f, 1.0f)
-            animation1.duration = 1000
-            animation1.fillAfter = true
-            sleepView.startAnimation(animation1)
-        }
+//        if (sleepView.tag == 1) {
+//            sleepView.tag = 0
+//            val animation1 = AlphaAnimation(0f, 1.0f)
+//            animation1.duration = 1000
+//            animation1.fillAfter = true
+//            sleepView.startAnimation(animation1)
+//        }
+        sleepView.visibility = View.GONE
     }
 
     private fun getViews() {

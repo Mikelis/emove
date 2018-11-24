@@ -145,7 +145,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:text="@string/temp_placeholder"
+        android:text="..."
         android:textColor="@color/status_color"
         android:textSize="37sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -248,7 +248,8 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <View
-        android:alpha="0"
+        android:visibility="gone"
+        android:alpha="0.5"
         android:id="@+id/sleep_alert_white"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
