@@ -17,15 +17,11 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
-
 import com.google.gson.Gson
 import com.movesense.mds.*
 import com.polidea.rxandroidble.RxBleClient
 import com.polidea.rxandroidble.scan.ScanSettings
 import rx.Observable
-
-import java.util.ArrayList
-
 import rx.Subscription
 import rx.subjects.BehaviorSubject
 import java.util.*
@@ -48,7 +44,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
     private var tempList: MutableList<TemperatureSubscribeModel> = mutableListOf()
     private var hrList: MutableList<HeartRate> = mutableListOf()
 
-    internal var mScanResArrayAdapter: ArrayAdapter<MyScanResult>? = null
     private var mdsSubscription: MdsSubscription? = null
     private var subscribedDeviceSerial: String? = null
 
@@ -81,6 +76,26 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
     private val dataSubject: BehaviorSubject<Data> = BehaviorSubject.create(data)
 
     fun getData(): Observable<Data> = dataSubject.asObservable()
+
+
+    companion object {
+        private val LOG_TAG = MainActivity::class.java.simpleName
+        private val MY_PERMISSIONS_REQUEST_LOCATION = 1
+        val URI_CONNECTEDDEVICES = "suunto://MDS/ConnectedDevices"
+        val URI_EVENTLISTENER = "suunto://MDS/EventListener"
+        val SCHEME_PREFIX = "suunto://"
+
+        // BleClient singleton
+        private var mBleClient: RxBleClient? = null
+
+        // Sensor subscription
+        private val URI_MEAS_ACC_13 = "/Meas/Acc/13"
+
+        private const val SECOND_TAG: String = "SECOND"
+        private const val THIRD_TAG: String = "THIRD"
+        private const val FOURTH_TAG: String = "FOURTH"
+        private const val RIGHT_MARGIN: Float = 11f
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -299,7 +314,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
         })
 
 //                    (findViewById(R.id.sensorMsg) as TextView).text = accStr
-                }
+
         tempSubscription = mMds?.subscribe("suunto://MDS/EventListener",
                 formatContractToJson(connectedSerial, "Meas/Temp"), object : MdsNotificationListener {
             override fun onNotification(notification: String) {
@@ -432,24 +447,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
         unsubscribe()
     }
 
-    companion object {
-        private val LOG_TAG = MainActivity::class.java.simpleName
-        private val MY_PERMISSIONS_REQUEST_LOCATION = 1
-        val URI_CONNECTEDDEVICES = "suunto://MDS/ConnectedDevices"
-        val URI_EVENTLISTENER = "suunto://MDS/EventListener"
-        val SCHEME_PREFIX = "suunto://"
-
-        // BleClient singleton
-        private var mBleClient: RxBleClient? = null
-
-        // Sensor subscription
-        private val URI_MEAS_ACC_13 = "/Meas/Acc/13"
-
-        private const val SECOND_TAG: String = "SECOND"
-        private const val THIRD_TAG: String = "THIRD"
-        private const val FOURTH_TAG: String = "FOURTH"
-        private const val RIGHT_MARGIN: Float = 11f
-    }
 
     data class Data(
             val acceleration: AccDataResponse? = null,
@@ -461,7 +458,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
 
         enum class State {
             ALERT, DROWSY, SLEEP
-        }
 
+
+        }
     }
 }
