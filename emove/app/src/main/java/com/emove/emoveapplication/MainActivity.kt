@@ -8,6 +8,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
 import com.emove.emoveapplication.MainViewModel.State
+import com.movesense.mds.Mds
 import com.polidea.rxandroidble.RxBleClient
 import kotlinx.android.synthetic.main.activity_main.*
 import rx.subscriptions.CompositeSubscription
@@ -22,8 +23,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        vm = ViewModelProviders.of(this, MainViewModel.Factory(lifecycle, RxBleClient.create(this), ))
-                .get(MainViewModel::class.java)
+        vm = ViewModelProviders.of(
+                this,
+                MainViewModel.Factory(
+                        lifecycle,
+                        RxBleClient.create(this),
+                        Mds.Builder().build(this)
+                )
+        ).get(MainViewModel::class.java)
     }
 
     override fun onResume() {
@@ -49,6 +56,8 @@ class MainActivity : AppCompatActivity() {
             showScanning(false)
             showData()
         }
+        else -> {
+        }
     }
 
     private fun requestNeededPermissions() {
@@ -60,6 +69,8 @@ class MainActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this,
                     arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 1)
 
+        } else {
+            vm.onPermissionGranted()
         }
     }
 

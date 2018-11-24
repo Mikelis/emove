@@ -47,13 +47,13 @@ class MainViewModel(
     }
 
     override fun onConnected(macAddress: String, serial: String) {
-        myScanResult!!.markConnected(serial)
+         myScanResult!!.markConnected(serial)
         stateSubject.onNext(State.Connected)
         subToSensor()
     }
 
     private fun subToSensor() {
-        // TODO
+        TODO()
     }
 
     class Factory(private val lifecycle: Lifecycle,
