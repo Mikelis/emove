@@ -79,6 +79,31 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
 
     fun getData(): Observable<Data> = dataSubject.asObservable()
 
+    fun t() {
+        dataSubject.asObservable()
+                .map { d -> d.heartRate?.body?.rrData?.firstOrNull() ?: 0 }
+//                .doOnNext { Log.d("HRVR", it.toString()) }
+                .buffer(150, 15) // 10 sec, 1 sec
+//                .doOnNext { Log.d("HRV Buffered", it.toString()) }
+                .map { list ->
+                    (0 until (list.size - 1)).map { i ->
+                        Math.pow((list[i] - list[i + 1]).toDouble(), 2.toDouble())
+                    }
+                }
+//                .doOnNext { Log.d("HRV Squares", it.toString()) }
+                .map { squares -> Math.sqrt(squares.average()) } // average error
+//                .doOnNext { Log.d("HRV avg err", it.toString()) }
+                .buffer(10, 1) // 1 min
+                .map { list: MutableList<Double> ->
+                    val min = list.min() ?: 0.toDouble()
+                    val max = list.max() ?: 0.toDouble()
+                    val diff = max - min
+                    Triple(min, max, diff)
+                }
+                .subscribe {
+                    Log.d("HRV size", it.toString())
+                }
+    }
 
     companion object {
         private val LOG_TAG = MainActivity::class.java.simpleName
@@ -122,8 +147,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener {
         setOnBoardingNavigation()
         getData().subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread()).subscribe { data ->
-                    Log.e("GetData",data.heartRate.toString())
+                    Log.e("GetData", data.heartRate.toString())
                 }
+
+        t()
     }
 
     private fun getViews() {
