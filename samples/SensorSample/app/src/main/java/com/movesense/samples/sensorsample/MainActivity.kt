@@ -38,6 +38,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
     private var tempSubscription: MdsSubscription? = null
     private var heartRateSubscription: MdsSubscription? = null
 
+    private var tempList: MutableList<TemperatureSubscribeModel> = mutableListOf()
+    private var hrList: MutableList<HeartRate> = mutableListOf()
 
     private var subscribedDeviceSerial: String? = null
 
@@ -106,7 +108,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
         )
                 .subscribe(
                         { scanResult ->
-                            Log.d(LOG_TAG, "scanResult: $scanResult")
 
                             // Process scan result here. filter movesense devices.
                             if (scanResult.bleDevice != null &&
@@ -178,7 +179,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
         accSubscription = mMds?.subscribe(URI_EVENTLISTENER,
                 strContract, object : MdsNotificationListener {
             override fun onNotification(data: String) {
-                Log.d(LOG_TAG, "onNotification(): $data")
 
 
                 val accResponse = Gson().fromJson(data, AccDataResponse::class.java)
@@ -197,7 +197,15 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
             override fun onNotification(data: String) {
                 val temperature = Gson().fromJson<TemperatureSubscribeModel>(data, TemperatureSubscribeModel::class.java)
 
-                Log.d("MainActivity", "Subscription Temperature - ${temperature.body.measurement - 273.15}")
+                tempList.add(temperature)
+
+                if (tempList.size >= 10) {
+                    val amount = tempList.sumBy { it.body.measurement.toInt() }
+
+                    Log.d("MainActivity", "Subscription Temperature - ${(amount / 10) - 273.15}")
+
+                    tempList.clear()
+                }
             }
 
             override fun onError(error: MdsException) {
@@ -211,7 +219,14 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemLongClickListener, A
             override fun onNotification(data: String) {
                 val temperature = Gson().fromJson<HeartRate>(data, HeartRate::class.java)
 
-                Log.d("MainActivity", "Subscription HeartRate - ${temperature.body.average}")
+                hrList.add(temperature)
+
+                if (hrList.size >= 50) {
+                    val amount = hrList.sumBy { it.body.average.toInt() }
+
+                    Log.d("MainActivity", "Subscription HeartRate - ${amount / 50}")
+                    hrList.clear()
+                }
             }
 
             override fun onError(error: MdsException) {
